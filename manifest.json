@@ -1,0 +1,15 @@
+{
+  "name": "ナンバーズ練習ツール",
+  "short_name": "Numbers練習",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#1e293b",
+  "theme_color": "#1e293b",
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

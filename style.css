@@ -1,0 +1,204 @@
+:root {
+  --bg: #1e293b;
+  --surface: #273549;
+  --cell-bg: #334155;
+  --cell-selected: #3b82f6;
+  --text: #f1f5f9;
+  --text-dim: #94a3b8;
+  --accent: #3b82f6;
+  --accent-dark: #2563eb;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", sans-serif;
+  display: flex;
+  justify-content: center;
+}
+
+#app {
+  width: 100%;
+  max-width: 480px;
+  min-height: 100dvh;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.hidden {
+  display: none !important;
+}
+
+h1 {
+  text-align: center;
+  font-size: 22px;
+  margin: 8px 0;
+}
+
+fieldset {
+  border: 1px solid #3b4759;
+  border-radius: 8px;
+  padding: 10px 14px;
+}
+
+legend {
+  padding: 0 6px;
+  color: var(--text-dim);
+  font-size: 13px;
+}
+
+fieldset label {
+  display: block;
+  padding: 6px 0;
+  font-size: 15px;
+}
+
+fieldset input {
+  margin-right: 8px;
+  transform: scale(1.1);
+  vertical-align: middle;
+}
+
+.btn-primary, .btn-secondary {
+  border: none;
+  border-radius: 10px;
+  padding: 14px;
+  font-size: 17px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: white;
+}
+
+.btn-primary:active {
+  background: var(--accent-dark);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--text-dim);
+  border: 1px solid #3b4759;
+}
+
+/* ゲーム画面 */
+
+.hud {
+  display: flex;
+  justify-content: space-between;
+  font-size: 15px;
+  color: var(--text-dim);
+}
+
+.hud-item span {
+  color: var(--text);
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.target {
+  text-align: center;
+  font-size: 13px;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+}
+
+.target-number {
+  font-size: 48px;
+  font-weight: 800;
+  color: var(--text);
+  line-height: 1.2;
+}
+
+.board {
+  flex: 1;
+  display: grid;
+  gap: 8px;
+  align-content: center;
+}
+
+.cell {
+  aspect-ratio: 1;
+  border: none;
+  border-radius: 10px;
+  background: var(--cell-bg);
+  color: var(--text);
+  font-size: clamp(16px, 6vw, 28px);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.1s, transform 0.1s;
+}
+
+.cell.selected {
+  background: var(--cell-selected);
+  transform: scale(0.95);
+}
+
+.cell.disabled {
+  opacity: 0.35;
+}
+
+.selection {
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-dim);
+}
+
+.expression {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  min-height: 28px;
+}
+
+/* 結果画面 */
+
+.stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.stat {
+  background: var(--surface);
+  border-radius: 10px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.stat-label {
+  font-size: 13px;
+  color: var(--text-dim);
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 800;
+}

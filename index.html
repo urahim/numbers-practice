@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>ナンバーズ練習ツール</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1e293b">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<main id="app">
+
+  <!-- 設定画面 -->
+  <section id="screen-settings" class="screen">
+    <h1>ナンバーズ練習ツール</h1>
+
+    <fieldset>
+      <legend>盤面サイズ</legend>
+      <label><input type="radio" name="boardSize" value="3"> 3×3（初心者）</label>
+      <label><input type="radio" name="boardSize" value="4"> 4×4</label>
+      <label><input type="radio" name="boardSize" value="5" checked> 5×5（推奨）</label>
+      <label><input type="radio" name="boardSize" value="6"> 6×6</label>
+    </fieldset>
+
+    <fieldset>
+      <legend>お題モード</legend>
+      <label><input type="radio" name="mode" value="normal" checked> 通常（6〜24からランダム）</label>
+      <label><input type="radio" name="mode" value="16"> 16だけ</label>
+      <label><input type="radio" name="mode" value="20"> 20だけ</label>
+      <label><input type="radio" name="mode" value="21"> 21だけ</label>
+      <label><input type="radio" name="mode" value="23"> 23だけ</label>
+    </fieldset>
+
+    <fieldset>
+      <legend>選択ルール</legend>
+      <label><input type="checkbox" id="adjacencyOnly"> 隣接マスのみ選択可能（本番に近い練習）</label>
+    </fieldset>
+
+    <button id="btn-start" class="btn-primary">スタート</button>
+  </section>
+
+  <!-- ゲーム画面 -->
+  <section id="screen-game" class="screen hidden">
+    <div class="hud">
+      <div class="hud-item">残り <span id="timeLeft">60</span>秒</div>
+      <div class="hud-item">スコア <span id="score">0</span></div>
+    </div>
+
+    <div class="target">TARGET<div id="target" class="target-number">--</div></div>
+
+    <div id="board" class="board"></div>
+
+    <div class="selection">選択中<div id="expression" class="expression">&nbsp;</div></div>
+
+    <button id="btn-decide" class="btn-primary">決定</button>
+  </section>
+
+  <!-- 結果画面 -->
+  <section id="screen-result" class="screen hidden">
+    <h1>終了！</h1>
+    <div class="stats">
+      <div class="stat"><span class="stat-label">正解数</span><span id="stat-correct" class="stat-value">0問</span></div>
+      <div class="stat"><span class="stat-label">正答率</span><span id="stat-accuracy" class="stat-value">-</span></div>
+      <div class="stat"><span class="stat-label">平均回答時間</span><span id="stat-avg" class="stat-value">-</span></div>
+      <div class="stat"><span class="stat-label">最速</span><span id="stat-fastest" class="stat-value">-</span></div>
+    </div>
+    <button id="btn-retry" class="btn-primary">同じ設定でもう一度</button>
+    <button id="btn-back" class="btn-secondary">設定を変更</button>
+  </section>
+
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>
