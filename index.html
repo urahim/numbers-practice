@@ -19,8 +19,6 @@
 
     <fieldset>
       <legend>盤面サイズ</legend>
-      <label><input type="radio" name="boardSize" value="3"> 3×3（初心者）</label>
-      <label><input type="radio" name="boardSize" value="4"> 4×4</label>
       <label><input type="radio" name="boardSize" value="5" checked> 5×5（推奨）</label>
       <label><input type="radio" name="boardSize" value="6"> 6×6</label>
     </fieldset>
@@ -32,6 +30,9 @@
       <label><input type="radio" name="mode" value="20"> 20だけ</label>
       <label><input type="radio" name="mode" value="21"> 21だけ</label>
       <label><input type="radio" name="mode" value="23"> 23だけ</label>
+      <label><input type="radio" name="mode" value="odd"> 奇数</label>
+      <label><input type="radio" name="mode" value="even"> 偶数</label>
+      <label><input type="radio" name="mode" value="prime"> 素数</label>
     </fieldset>
 
     <fieldset>
@@ -65,10 +66,10 @@
       <div class="stat"><span class="stat-label">正解数</span><span id="stat-correct" class="stat-value">0問</span></div>
       <div class="stat"><span class="stat-label">正答率</span><span id="stat-accuracy" class="stat-value">-</span></div>
       <div class="stat"><span class="stat-label">平均回答時間</span><span id="stat-avg" class="stat-value">-</span></div>
-      <div class="stat"><span class="stat-label">最速</span><span id="stat-fastest" class="stat-value">-</span></div>
+      <div class="stat"><span class="stat-label">消したブロック数</span><span id="stat-blocks" class="stat-value">0個</span></div>
     </div>
     <button id="btn-retry" class="btn-primary">同じ設定でもう一度</button>
-    <button id="btn-back" class="btn-secondary">設定を変更</button>
+    <button id="btn-back" class="btn-secondary">ホームに戻る</button>
   </section>
 
 </main>
