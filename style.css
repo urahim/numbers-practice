@@ -155,6 +155,7 @@ fieldset input {
 }
 
 .cell {
+  --row-shift: 0px;
   position: relative;
   aspect-ratio: 1;
   border: none;
@@ -166,11 +167,14 @@ fieldset input {
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  transform: translateX(var(--row-shift));
   transition: transform 0.1s;
 }
 
 /* 形・色は疑似要素側に描画する。clip-pathの形の外側にも
-   光彩(drop-shadow)を出すため、本体(.cell)にはclip-pathを付けない。 */
+   光彩(drop-shadow)を出すため、本体(.cell)にはclip-pathを付けない。
+   形によって面積比が違う（丸・四角は大きく、三角・星は小さくなりがち）ので
+   ::beforeをshapeごとに拡大してタップ時の見た目の大きさを揃える。 */
 .cell::before {
   content: "";
   position: absolute;
@@ -182,7 +186,7 @@ fieldset input {
 
 .cell.selected {
   filter: brightness(0.55) drop-shadow(0 0 2px #fff) drop-shadow(0 0 3px #fff);
-  transform: scale(0.9);
+  transform: translateX(var(--row-shift)) scale(0.9);
 }
 
 .cell.disabled {
@@ -191,7 +195,7 @@ fieldset input {
 
 .cell.clearing {
   transition: transform 0.2s ease-in, opacity 0.2s ease-in;
-  transform: scale(0);
+  transform: translateX(var(--row-shift)) scale(0);
   opacity: 0;
 }
 
@@ -201,11 +205,11 @@ fieldset input {
 
 @keyframes cellDropIn {
   from {
-    transform: translateY(-60px);
+    transform: translateX(var(--row-shift)) translateY(-60px);
     opacity: 0.3;
   }
   to {
-    transform: translateY(0);
+    transform: translateX(var(--row-shift)) translateY(0);
     opacity: 1;
   }
 }
@@ -213,19 +217,29 @@ fieldset input {
 /* 数字ごとの形・色（落ち着いた色味のバリエーション） */
 .cell.n1::before { background: #b3543f; border-radius: 50%; }
 .cell.n2::before { background: #5a92a8; border-radius: 50%; }
-.cell.n3::before { background: #5a8f6e; clip-path: polygon(50% 6%, 4% 94%, 96% 94%); }
+.cell.n3::before {
+  background: #5a8f6e;
+  transform: scale(1.4);
+  clip-path: polygon(50% 6%, 4% 94%, 96% 94%);
+}
 .cell.n4::before { background: #b8894a; border-radius: 8px; }
 .cell.n5 { color: #1e293b; }
 .cell.n5::before {
   background: #c4b658;
+  transform: scale(1.38);
   clip-path: polygon(
     50% 6%, 68.8% 24.1%, 91.9% 36.4%, 80.4% 59.9%, 75.9% 85.6%,
     50% 82%, 24.1% 85.6%, 19.6% 59.9%, 8.15% 36.4%, 31.2% 24.1%
   );
 }
-.cell.n6::before { background: #b06a8f; clip-path: polygon(25% 4%, 75% 4%, 100% 50%, 75% 96%, 25% 96%, 0% 50%); }
+.cell.n6::before {
+  background: #b06a8f;
+  transform: scale(1.07);
+  clip-path: polygon(25% 4%, 75% 4%, 100% 50%, 75% 96%, 25% 96%, 0% 50%);
+}
 .cell.n7::before {
   background: #8268ab;
+  transform: scale(1.38);
   clip-path: polygon(
     50% 6%, 68.8% 24.1%, 91.9% 36.4%, 80.4% 59.9%, 75.9% 85.6%,
     50% 82%, 24.1% 85.6%, 19.6% 59.9%, 8.15% 36.4%, 31.2% 24.1%
@@ -234,10 +248,12 @@ fieldset input {
 .cell.n8 { color: #1e293b; }
 .cell.n8::before {
   background: #8ead63;
+  transform: scale(1.07);
   clip-path: polygon(25% 4%, 75% 4%, 100% 50%, 75% 96%, 25% 96%, 0% 50%);
 }
 .cell.n9::before {
   background: #33456f;
+  transform: scale(1.3);
   clip-path: polygon(
     50% 6%, 61.6% 18.1%, 78.3% 16.3%, 79.4% 33%, 93.3% 42.4%,
     83.5% 55.9%, 88.1% 72%, 71.9% 76%, 65.1% 91.4%, 50% 84%,
@@ -260,6 +276,20 @@ fieldset input {
 }
 
 /* 結果画面 */
+
+.final-score {
+  text-align: center;
+  font-size: 13px;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+}
+
+.final-score-value {
+  font-size: 40px;
+  font-weight: 800;
+  color: var(--text);
+  line-height: 1.3;
+}
 
 .stats {
   display: grid;

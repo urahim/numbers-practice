@@ -1,9 +1,11 @@
-const CACHE_NAME = "numbers-practice-v1";
+const CACHE_NAME = "numbers-practice-v2";
 const ASSETS = [
   "./",
   "./index.html",
   "./style.css",
   "./app.js",
+  "./scoring.js",
+  "./scoring-config.json",
   "./manifest.json",
   "./icons/icon.svg",
 ];

@@ -34,11 +34,26 @@
     return Math.floor(Math.random() * (max - min + 1)) + min;
   }
 
+  // 本番アプリの盤面は1〜9が均等ではなく、小さい数字ほど多く出る傾向があった
+  // （実際のプレイ画面を確認：1・2・4が多数、7・8はほぼ出ないコマもあった）ため、
+  // それに近づけて小さい数字ほど出やすい重み付き乱数にしている。
+  const DIGIT_WEIGHTS = [18, 16, 14, 12, 10, 8, 6, 4, 2]; // 1〜9に対応
+  const DIGIT_WEIGHT_TOTAL = DIGIT_WEIGHTS.reduce((a, b) => a + b, 0);
+
+  function randDigit() {
+    let r = Math.random() * DIGIT_WEIGHT_TOTAL;
+    for (let i = 0; i < DIGIT_WEIGHTS.length; i++) {
+      if (r < DIGIT_WEIGHTS[i]) return i + 1;
+      r -= DIGIT_WEIGHTS[i];
+    }
+    return DIGIT_WEIGHTS.length;
+  }
+
   function makeGrid(size) {
     const grid = [];
     for (let r = 0; r < size; r++) {
       const row = [];
-      for (let c = 0; c < size; c++) row.push(randInt(1, 9));
+      for (let c = 0; c < size; c++) row.push(randDigit());
       grid.push(row);
     }
     return grid;
@@ -63,7 +78,7 @@
       }
       const missing = size - remaining.length;
       const refilled = [];
-      for (let i = 0; i < missing; i++) refilled.push(randInt(1, 9));
+      for (let i = 0; i < missing; i++) refilled.push(randDigit());
       const finalCol = refilled.concat(remaining);
       for (let r = 0; r < size; r++) grid[r][c] = finalCol[r];
     }
@@ -197,6 +212,7 @@
       const btn = document.createElement("button");
       btn.className = `cell n${cell.value}`;
       if (dropCols && dropCols.has(cell.col)) btn.classList.add("drop-in");
+      if (cell.row % 2 === 1) btn.style.setProperty("--row-shift", "50%");
       btn.textContent = cell.value;
       btn.dataset.idx = idx;
       btn.addEventListener("pointerdown", (e) => onPointerDown(e, idx));
@@ -343,10 +359,17 @@
     }
 
     const now = performance.now();
-    state.responseTimes.push((now - state.questionStartedAt) / 1000);
+    const seconds = (now - state.questionStartedAt) / 1000;
+    state.responseTimes.push(seconds);
     state.blocksCleared += state.selected.length;
-    state.score++;
-    scoreEl.textContent = state.score;
+    state.correctCount++;
+
+    const gained = ScoringEngine.scoreForAnswer({
+      sum: currentSum(),
+      blockCount: state.selected.length,
+    });
+    state.rawScore += gained;
+    scoreEl.textContent = state.rawScore.toLocaleString();
 
     const clearedIdx = state.selected.slice();
     const affectedCols = new Set(clearedIdx.map((idx) => state.board[idx].col));
@@ -416,7 +439,8 @@
       target: round.target,
       label: round.label,
       predicate: round.predicate,
-      score: 0,
+      correctCount: 0,
+      rawScore: 0,
       attempts: 0,
       blocksCleared: 0,
       responseTimes: [],
@@ -438,7 +462,7 @@
 
   function endGame() {
     showScreen("result");
-    const correct = state.score;
+    const correct = state.correctCount;
     const attempts = state.attempts;
     const accuracy = attempts > 0 ? Math.round((correct / attempts) * 100) : null;
     const avg =
@@ -446,6 +470,12 @@
         ? state.responseTimes.reduce((a, b) => a + b, 0) / state.responseTimes.length
         : null;
 
+    const result = ScoringEngine.finalizeScore(state.rawScore, correct);
+
+    document.getElementById("final-score").textContent = result.finalTotal.toLocaleString();
+    document.getElementById("stat-raw-score").textContent = result.rawTotal.toLocaleString();
+    document.getElementById("stat-bonus").textContent =
+      `+${result.bonus.toLocaleString()}（${Math.round(result.bonusRate * 100)}%）`;
     document.getElementById("stat-correct").textContent = `${correct}問`;
     document.getElementById("stat-accuracy").textContent = accuracy === null ? "-" : `${accuracy}%`;
     document.getElementById("stat-avg").textContent = avg === null ? "-" : `${avg.toFixed(1)}秒`;
@@ -453,8 +483,9 @@
   }
 
   // ---- イベント登録 ----
-  btnStart.addEventListener("click", () => {
+  btnStart.addEventListener("click", async () => {
     readSettingsFromUI();
+    await ScoringEngine.ready;
     startGame();
   });
 
