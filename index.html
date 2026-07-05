@@ -35,11 +35,6 @@
       <label><input type="radio" name="mode" value="prime"> 素数</label>
     </fieldset>
 
-    <fieldset>
-      <legend>選択ルール</legend>
-      <label><input type="checkbox" id="adjacencyOnly"> 隣接マスのみ選択可能（本番に近い練習）</label>
-    </fieldset>
-
     <button id="btn-start" class="btn-primary">スタート</button>
   </section>
 
@@ -52,11 +47,12 @@
 
     <div class="target">TARGET<div id="target" class="target-number">--</div></div>
 
-    <div id="board" class="board"></div>
+    <div id="board-wrap" class="board-wrap">
+      <div id="board" class="board"></div>
+      <svg id="selectionLine" class="selection-line"></svg>
+    </div>
 
     <div class="selection">選択中<div id="expression" class="expression">&nbsp;</div></div>
-
-    <button id="btn-decide" class="btn-primary">決定</button>
   </section>
 
   <!-- 結果画面 -->

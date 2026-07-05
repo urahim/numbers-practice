@@ -10,16 +10,16 @@
   };
 
   const boardEl = document.getElementById("board");
+  const selectionLineEl = document.getElementById("selectionLine");
   const targetEl = document.getElementById("target");
   const expressionEl = document.getElementById("expression");
   const timeLeftEl = document.getElementById("timeLeft");
   const scoreEl = document.getElementById("score");
-  const btnDecide = document.getElementById("btn-decide");
   const btnStart = document.getElementById("btn-start");
   const btnRetry = document.getElementById("btn-retry");
   const btnBack = document.getElementById("btn-back");
 
-  let settings = { boardSize: 5, mode: "normal", adjacencyOnly: false };
+  let settings = { boardSize: 5, mode: "normal" };
 
   let state = null; // per-game state
 
@@ -199,42 +199,76 @@
       if (dropCols && dropCols.has(cell.col)) btn.classList.add("drop-in");
       btn.textContent = cell.value;
       btn.dataset.idx = idx;
-      btn.addEventListener("click", () => onCellClick(idx));
+      btn.addEventListener("pointerdown", (e) => onPointerDown(e, idx));
       boardEl.appendChild(btn);
     });
     refreshCellStates();
+    updateSelectionLine();
   }
 
   function isAdjacent(a, b) {
     return Math.abs(a.row - b.row) <= 1 && Math.abs(a.col - b.col) <= 1 && !(a.row === b.row && a.col === b.col);
   }
 
-  function onCellClick(idx) {
+  function cellIdxFromPoint(x, y) {
+    const el = document.elementFromPoint(x, y);
+    const cellEl = el && el.closest ? el.closest(".cell") : null;
+    if (!cellEl || cellEl.dataset.idx === undefined) return null;
+    return parseInt(cellEl.dataset.idx, 10);
+  }
+
+  // ---- なぞって選択（ドラッグ） ----
+  function onPointerDown(e, idx) {
     if (state.locked) return;
-    const selPos = state.selected.indexOf(idx);
-    if (selPos !== -1) {
-      // 選択済みなら解除
-      state.selected.splice(selPos, 1);
+    e.preventDefault();
+    state.dragging = true;
+    state.selected = [idx];
+    refreshCellStates();
+    updateExpression();
+    updateSelectionLine();
+  }
+
+  function onPointerMove(e) {
+    if (!state.dragging || state.locked) return;
+    const idx = cellIdxFromPoint(e.clientX, e.clientY);
+    if (idx === null) return;
+    const path = state.selected;
+    const last = path[path.length - 1];
+    if (idx === last) return;
+
+    if (path.length >= 2 && idx === path[path.length - 2]) {
+      // 1つ前のマスに戻ったら、そこまで選択を戻す
+      path.pop();
       refreshCellStates();
       updateExpression();
+      updateSelectionLine();
       return;
     }
 
-    if (settings.adjacencyOnly && state.selected.length > 0) {
-      const lastCell = state.board[state.selected[state.selected.length - 1]];
-      const thisCell = state.board[idx];
-      if (!isAdjacent(lastCell, thisCell)) return;
-    }
+    if (path.includes(idx)) return;
 
-    state.selected.push(idx);
+    if (!isAdjacent(state.board[last], state.board[idx])) return;
+
+    path.push(idx);
     refreshCellStates();
     updateExpression();
+    updateSelectionLine();
   }
+
+  function onPointerUp() {
+    if (!state.dragging) return;
+    state.dragging = false;
+    submitSelection();
+  }
+
+  document.addEventListener("pointermove", onPointerMove);
+  document.addEventListener("pointerup", onPointerUp);
+  document.addEventListener("pointercancel", onPointerUp);
 
   function refreshCellStates() {
     const cells = boardEl.children;
     let allowedSet = null;
-    if (settings.adjacencyOnly && state.selected.length > 0) {
+    if (state.selected.length > 0) {
       const lastCell = state.board[state.selected[state.selected.length - 1]];
       allowedSet = new Set();
       state.board.forEach((c, i) => {
@@ -260,17 +294,53 @@
     expressionEl.textContent = `${values.join(" + ")} = ${sum}`;
   }
 
+  // 選択したマスの中心をつなぐ線を描画
+  function updateSelectionLine() {
+    if (!state || state.selected.length < 2) {
+      selectionLineEl.innerHTML = "";
+      return;
+    }
+    const wrapRect = boardEl.parentElement.getBoundingClientRect();
+    const points = state.selected
+      .map((idx) => {
+        const el = boardEl.children[idx];
+        if (!el) return null;
+        const r = el.getBoundingClientRect();
+        const x = r.left + r.width / 2 - wrapRect.left;
+        const y = r.top + r.height / 2 - wrapRect.top;
+        return `${x},${y}`;
+      })
+      .filter(Boolean)
+      .join(" ");
+    selectionLineEl.setAttribute("viewBox", `0 0 ${wrapRect.width} ${wrapRect.height}`);
+    selectionLineEl.innerHTML = `<polyline points="${points}" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0.85" />`;
+  }
+
   function currentSum() {
     return state.selected.reduce((s, i) => s + state.board[i].value, 0);
   }
 
   const CLEAR_ANIM_MS = 220;
 
-  function onDecide() {
+  // 指を離した瞬間に自動で判定する
+  function submitSelection() {
     if (state.locked) return;
-    if (state.selected.length < 2) return;
+    if (state.selected.length < 2) {
+      state.selected = [];
+      refreshCellStates();
+      updateExpression();
+      updateSelectionLine();
+      return;
+    }
     state.attempts++;
-    if (!state.predicate(currentSum())) return; // 不正解時は何もしない
+    if (!state.predicate(currentSum())) {
+      // 不正解：選択だけリセットして仕切り直し
+      state.selected = [];
+      refreshCellStates();
+      updateExpression();
+      updateSelectionLine();
+      return;
+    }
 
     const now = performance.now();
     state.responseTimes.push((now - state.questionStartedAt) / 1000);
@@ -292,6 +362,7 @@
     state.selected = [];
     state.locked = true;
     updateExpression();
+    updateSelectionLine();
 
     setTimeout(() => {
       // 正解したマスを盤面から消し、上から補充する
@@ -334,7 +405,6 @@
     const modeInput = document.querySelector('input[name="mode"]:checked');
     settings.boardSize = parseInt(boardSizeInput.value, 10);
     settings.mode = modeInput.value;
-    settings.adjacencyOnly = document.getElementById("adjacencyOnly").checked;
   }
 
   function startGame() {
@@ -354,6 +424,7 @@
       timerId: null,
       questionStartedAt: 0,
       locked: false,
+      dragging: false,
     };
 
     scoreEl.textContent = "0";
@@ -386,8 +457,6 @@
     readSettingsFromUI();
     startGame();
   });
-
-  btnDecide.addEventListener("click", onDecide);
 
   btnRetry.addEventListener("click", () => {
     startGame();

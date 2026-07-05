@@ -132,18 +132,33 @@ fieldset input {
   line-height: 1.2;
 }
 
+.board-wrap {
+  position: relative;
+  flex: 1;
+  display: flex;
+}
+
 .board {
   flex: 1;
   display: grid;
   gap: 8px;
   align-content: center;
+  touch-action: none;
+}
+
+.selection-line {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
 }
 
 .cell {
+  position: relative;
   aspect-ratio: 1;
   border: none;
-  border-radius: 10px;
-  background: var(--cell-bg);
+  background: none;
   color: var(--text);
   font-size: clamp(16px, 6vw, 28px);
   font-weight: 700;
@@ -151,7 +166,18 @@ fieldset input {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background 0.1s, transform 0.1s;
+  transition: transform 0.1s;
+}
+
+/* 形・色は疑似要素側に描画する。clip-pathの形の外側にも
+   光彩(drop-shadow)を出すため、本体(.cell)にはclip-pathを付けない。 */
+.cell::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--cell-bg);
+  border-radius: 10px;
 }
 
 .cell.selected {
@@ -185,32 +211,32 @@ fieldset input {
 }
 
 /* 数字ごとの形・色（落ち着いた色味のバリエーション） */
-.cell.n1 { background: #b3543f; border-radius: 50%; }
-.cell.n2 { background: #5a92a8; border-radius: 50%; }
-.cell.n3 { background: #5a8f6e; clip-path: polygon(50% 6%, 4% 94%, 96% 94%); }
-.cell.n4 { background: #b8894a; border-radius: 8px; }
-.cell.n5 {
+.cell.n1::before { background: #b3543f; border-radius: 50%; }
+.cell.n2::before { background: #5a92a8; border-radius: 50%; }
+.cell.n3::before { background: #5a8f6e; clip-path: polygon(50% 6%, 4% 94%, 96% 94%); }
+.cell.n4::before { background: #b8894a; border-radius: 8px; }
+.cell.n5 { color: #1e293b; }
+.cell.n5::before {
   background: #c4b658;
-  color: #1e293b;
   clip-path: polygon(
     50% 6%, 68.8% 24.1%, 91.9% 36.4%, 80.4% 59.9%, 75.9% 85.6%,
     50% 82%, 24.1% 85.6%, 19.6% 59.9%, 8.15% 36.4%, 31.2% 24.1%
   );
 }
-.cell.n6 { background: #b06a8f; clip-path: polygon(25% 4%, 75% 4%, 100% 50%, 75% 96%, 25% 96%, 0% 50%); }
-.cell.n7 {
+.cell.n6::before { background: #b06a8f; clip-path: polygon(25% 4%, 75% 4%, 100% 50%, 75% 96%, 25% 96%, 0% 50%); }
+.cell.n7::before {
   background: #8268ab;
   clip-path: polygon(
     50% 6%, 68.8% 24.1%, 91.9% 36.4%, 80.4% 59.9%, 75.9% 85.6%,
     50% 82%, 24.1% 85.6%, 19.6% 59.9%, 8.15% 36.4%, 31.2% 24.1%
   );
 }
-.cell.n8 {
+.cell.n8 { color: #1e293b; }
+.cell.n8::before {
   background: #8ead63;
-  color: #1e293b;
   clip-path: polygon(25% 4%, 75% 4%, 100% 50%, 75% 96%, 25% 96%, 0% 50%);
 }
-.cell.n9 {
+.cell.n9::before {
   background: #33456f;
   clip-path: polygon(
     50% 6%, 61.6% 18.1%, 78.3% 16.3%, 79.4% 33%, 93.3% 42.4%,
