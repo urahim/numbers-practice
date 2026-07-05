@@ -367,6 +367,7 @@
     const gained = ScoringEngine.scoreForAnswer({
       sum: currentSum(),
       blockCount: state.selected.length,
+      label: state.label,
     });
     state.rawScore += gained;
     scoreEl.textContent = state.rawScore.toLocaleString();
