@@ -37,7 +37,9 @@ const ScoringEngine = (() => {
   function targetBaseFor(sum) {
     const key = String(sum);
     if (key in config.targetBase) return config.targetBase[key];
-    const maxKey = Math.max(...Object.keys(config.targetBase).map(Number));
+    const keys = Object.keys(config.targetBase).map(Number);
+    if (keys.length === 0) return config.targetBaseDefault;
+    const maxKey = Math.max(...keys);
     if (sum > maxKey) return config.targetBase[String(maxKey)];
     return config.targetBaseDefault;
   }
